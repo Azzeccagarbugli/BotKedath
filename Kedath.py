@@ -9,14 +9,10 @@ from settings import API, TOKEN, start_msg, help_msg
 cassiopeia.set_riot_api_key(API)
 cassiopeia.set_default_region("EUW")
 
-# Machine state variable
-machine_state = 0
-
 # Summoner Name
 summoner = ""
 
 def handle(msg):
-    global machine_state
     global summoner
 
     content_type, chat_type, chat_id = telepot.glance(msg)
@@ -24,47 +20,57 @@ def handle(msg):
     chat_id = msg['chat']['id']
     command_input = msg['text']
 
-    if machine_state == 0 and content_type == "text":
-        if command_input == "/start" or command_input == "/start@KedathBot":
-            bot.sendMessage(chat_id, start_msg)
+   
+    if command_input == "/start" or command_input == "/start@KedathBot":
+        bot.sendMessage(chat_id, start_msg)
 
-        elif command_input == "/help" or command_input == "/help@KedathBot":
-            bot.sendMessage(chat_id, help_msg)
+    elif command_input == "/help" or command_input == "/help@KedathBot":
+        bot.sendMessage(chat_id, help_msg)
 
-        elif command_input == "/set_username" or command_input == "/set_username@KedathBot":
-            set_username_msg = "Inserisci il tuo nome evocatore"
-            bot.sendMessage(chat_id, set_username_msg)
-            machine_state = 1
-    
-    elif machine_state == 1 and content_type == "text":
+    elif command_input == "/set_username" or command_input == "/set_username@KedathBot":
+        set_username_msg = "Inserisci il tuo nome evocatore"
+        
+        bot.sendMessage(chat_id, set_username_msg)
+
+
+
+        bot.sendMessage(chat_id, get_summoner_name(command_input))
+
         # Take some time to get all the info from RIOT
         bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode = "Markdown")
 
-        summoner_name = command_input
-        summoner = cassiopeia.get_summoner(name = summoner_name)
+    
+def get_summoner_name(command_input):
+    """
+    Check if a summoner name exists
+    """
+    check_msg = ""
 
-        if summoner.exists == True:
-            masteries = get_champion_masteries(summoner_name)
+    summoner_name = command_input
+    summoner = cassiopeia.get_summoner(name = summoner_name)
 
-            try:
-                check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                            "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
-                            "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
-                                                                                                summoner.level,
-                                                                                                masteries[0],
-                                                                                                masteries[1],
-                                                                                                masteries[2])
-            except IndexError:
-                check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                            "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
-                                                                                                summoner.level)
+    if summoner.exists == True:
+        masteries = get_champion_masteries(summoner_name)
 
-            bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
-            machine_state = 2
-        else:
-            check_msg = "Il tuo nome evocatore non esiste, prova nuovamente usando il comando /set_username"
-            bot.sendMessage(chat_id, check_msg)
-            machine_state = 0
+        try:
+            check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                        "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
+                        "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
+                                                                                            summoner.level,
+                                                                                            masteries[0],
+                                                                                            masteries[1],
+                                                                                            masteries[2])
+        except IndexError:
+            check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                        "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
+                                                                                            summoner.level)
+
+        bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
+    else:
+        check_msg = "Il tuo nome evocatore non esiste, prova nuovamente usando il comando /set_username"
+
+    return check_msg
+
     
     # elif machine_state = 2 and content_type == "text":
         
