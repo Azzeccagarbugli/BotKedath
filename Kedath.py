@@ -27,49 +27,52 @@ def handle(msg):
     elif command_input == "/help" or command_input == "/help@KedathBot":
         bot.sendMessage(chat_id, help_msg)
 
-    elif command_input == "/set_username" or command_input == "/set_username@KedathBot":
-        set_username_msg = "Inserisci il tuo nome evocatore"
-        
-        bot.sendMessage(chat_id, set_username_msg)
+    elif command_input.split()[0] == "/set_username" or command_input.split()[0] == "/set_username@KedathBot":
+        try:
+            summoner_name = command_input.split()[1]
 
+            try: 
+                summoner = get_summoner(summoner_name)
 
+                # Take some time to get all the info from RIOT
+                bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode="Markdown")
 
-        bot.sendMessage(chat_id, get_summoner_name(command_input))
+                masteries = get_champion_masteries(summoner_name)
 
-        # Take some time to get all the info from RIOT
-        bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode = "Markdown")
+                try:
+                    msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                                "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
+                                "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
+                                                                                                    summoner.level,
+                                                                                                    masteries[0],
+                                                                                                    masteries[1],
+                                                                                                    masteries[2])
+                except IndexError:
+                    msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                                "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
+                                                                                                summoner.level)
+
+            except:
+                msg = "Evocatore non trovato."
+
+        except IndexError:
+            msg = "Inserisci il tuo nome evocatore\n"\
+                  "/set\_username NOME"
+        finally:
+            bot.sendMessage(chat_id, msg, parse_mode="Markdown")
+
 
     
-def get_summoner_name(command_input):
+def get_summoner(summoner_name):
     """
-    Check if a summoner name exists
+    Check if a summoner exists and if exists return a 'summoner' instance
     """
-    check_msg = ""
-
-    summoner_name = command_input
     summoner = cassiopeia.get_summoner(name = summoner_name)
 
     if summoner.exists == True:
-        masteries = get_champion_masteries(summoner_name)
-
-        try:
-            check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                        "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
-                        "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
-                                                                                            summoner.level,
-                                                                                            masteries[0],
-                                                                                            masteries[1],
-                                                                                            masteries[2])
-        except IndexError:
-            check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                        "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
-                                                                                            summoner.level)
-
-        bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
+        return summoner
     else:
-        check_msg = "Il tuo nome evocatore non esiste, prova nuovamente usando il comando /set_username"
-
-    return check_msg
+        raise Exception('SummonerNotFound')
 
     
     # elif machine_state = 2 and content_type == "text":
@@ -106,6 +109,7 @@ def get_champion_masteries(summoner_name):
         rv.append(champion.champion.name)
 
     return rv
+
 
 # PID file
 pid = str(os.getpid())
