@@ -1,9 +1,14 @@
 import os
+import sys
 import telepot
-import cassiopeia as cass
-
+import cassiopeia
 from time import sleep
 from settings import API, TOKEN, start_msg, help_msg
+
+
+# Cassiopeia settings
+cassiopeia.set_riot_api_key(API)
+cassiopeia.set_default_region("EUW")
 
 # Machine state variable
 machine_state = 0
@@ -11,36 +16,46 @@ machine_state = 0
 # Summoner Name
 summoner = ""
 
-def handle(msg):
-    content_type, chat_type, chat_id = telepot.glance(msg)
 
+def handle(msg):
     global machine_state
     global summoner
+
+    content_type, chat_type, chat_id = telepot.glance(msg)
 
     chat_id = msg['chat']['id']
     command_input = msg['text']
 
-    cass.set_riot_api_key(API)
-    cass.set_default_region("EUW")
-
     if machine_state == 0 and content_type == "text":
         if command_input == "/start" or command_input == "/start@KedathBot":
             bot.sendMessage(chat_id, start_msg)
+
         elif command_input == "/help" or command_input == "/help@KedathBot":
             bot.sendMessage(chat_id, help_msg)
+
         elif command_input == "/set_username" or command_input == "/set_username@KedathBot":
             set_username_msg = "Inserisci il tuo nome evocatore"
             bot.sendMessage(chat_id, set_username_msg)
             machine_state = 1
     
     elif machine_state == 1 and content_type == "text":
+        # Take some time to get all the info from RIOT
+        bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode = "Markdown")
+
         summoner_name = command_input
-        summoner = cass.get_summoner(name=summoner_name)
-        # masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level = 7)
-        # list_champion_masteries = 
+        summoner = cassiopeia.get_summoner(name=summoner_name)
+
+        # TODO: bisogna controllare se ce ne sono almeno 3
+        masteries = get_champion_masteries(summoner_name)
+
         if summoner.exists == True:
-            check_msg = "Il tuo nome evocatore è stato riconosciuto. \nBenvenuto *{0}*! Il tuo livello attuale è: *{1}*"\
-                        "\n\nI tuoi main champion sono attualmente: {3}".format(summoner.name, summoner.level)
+            check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                        "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*\n\n"\
+                        "I tuoi main champion sono attualmente:\n{2}\n{3}\n{4}\n".format(summoner.name,
+                                                                                               summoner.level,
+                                                                                               masteries[0],
+                                                                                               masteries[1],
+                                                                                               masteries[2])
             bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
             machine_state = 2
         else:
@@ -51,7 +66,7 @@ def handle(msg):
     # elif machine_state = 2 and content_type == "text":
         
        
-    # summoner = cass.get_summoner(name="Azzeccagarbugli")
+    # summoner = cassiopeia.get_summoner(name="Azzeccagarbugli")
 
     # last_match = summoner.match_history()[0]
 
@@ -68,13 +83,24 @@ def handle(msg):
     #             print("Perfect KDA")
     #             break
 
-def get_champion_masteries(name)
+
+def get_champion_masteries(summoner_name):
+    """
+    Return given summoner champions with mastery = 7
+    """
+    rv = []
+
+    summoner = cassiopeia.get_summoner(name=summoner_name)
     masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level == 7)
-    listcm.champion.name for cm in masteries_champion 
+
+    for champion in masteries_champion:
+        rv.append(champion.champion.name)
+
+    return rv
 
 # PID file
 pid = str(os.getpid())
-pidfile = "/tmp/unimensabot.pid"
+pidfile = "/tmp/kedathbot.pid"
 
 # Check if PID exist
 if os.path.isfile(pidfile):
@@ -86,12 +112,11 @@ f = open(pidfile, 'w')
 f.write(pid)
 f.close()
 
+print('Vediamo quello che succede...')
 
 try:
     bot = telepot.Bot(TOKEN)
     bot.message_loop(handle)
-
-    print('Vediamo quello che succede...')
 
     while 1:
         sleep(10)
