@@ -15,7 +15,6 @@ machine_state = 0
 # Summoner Name
 summoner = ""
 
-
 def handle(msg):
     global machine_state
     global summoner
@@ -42,12 +41,17 @@ def handle(msg):
         bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode = "Markdown")
 
         summoner_name = command_input
-        summoner = cassiopeia.get_summoner(name=summoner_name)
-
-        # TODO: bisogna controllare se ce ne sono almeno 3
-        masteries = get_champion_masteries(summoner_name)
+        summoner = cassiopeia.get_summoner(name = summoner_name)
 
         if summoner.exists == True:
+            try:
+                masteries = get_champion_masteries(summoner_name)
+            except IndexError:
+                check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                            "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
+                                                                                                summoner.level)
+                bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
+
             check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
                         "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
                         "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
@@ -89,8 +93,8 @@ def get_champion_masteries(summoner_name):
     """
     rv = []
 
-    summoner = cassiopeia.get_summoner(name=summoner_name)
-    masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level >= 1)
+    summoner = cassiopeia.get_summoner(name = summoner_name)
+    masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level == 7)
 
     for champion in masteries_champion:
         rv.append(champion.champion.name)
