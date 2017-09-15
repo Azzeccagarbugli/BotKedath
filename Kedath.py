@@ -44,21 +44,21 @@ def handle(msg):
         summoner = cassiopeia.get_summoner(name = summoner_name)
 
         if summoner.exists == True:
+            masteries = get_champion_masteries(summoner_name)
+
             try:
-                masteries = get_champion_masteries(summoner_name)
+                check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                            "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
+                            "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
+                                                                                                summoner.level,
+                                                                                                masteries[0],
+                                                                                                masteries[1],
+                                                                                                masteries[2])
             except IndexError:
                 check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
                             "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
                                                                                                 summoner.level)
-                bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
 
-            check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                        "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
-                        "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
-                                                                                               summoner.level,
-                                                                                               masteries[0],
-                                                                                               masteries[1],
-                                                                                               masteries[2])
             bot.sendMessage(chat_id, check_msg, parse_mode = "Markdown")
             machine_state = 2
         else:
