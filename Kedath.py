@@ -3,7 +3,7 @@ import sys
 import telepot
 import cassiopeia
 from time import sleep
-from settings_dist import API, TOKEN, start_msg, help_msg
+from settings import API, TOKEN, start_msg, help_msg
 
 # Cassiopeia settings
 cassiopeia.set_riot_api_key(API)
@@ -93,7 +93,7 @@ def get_champion_masteries(summoner_name):
     """
     rv = []
 
-    summoner = cassiopeia.get_summoner(name = summoner_name)
+    summoner = cassiopeia.get_summoner(name=summoner_name)
     masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level == 7)
 
     for champion in masteries_champion:
