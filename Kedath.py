@@ -3,8 +3,7 @@ import sys
 import telepot
 import cassiopeia
 from time import sleep
-from settings import API, TOKEN, start_msg, help_msg
-
+from settings_dist import API, TOKEN, start_msg, help_msg
 
 # Cassiopeia settings
 cassiopeia.set_riot_api_key(API)
@@ -50,8 +49,8 @@ def handle(msg):
 
         if summoner.exists == True:
             check_msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                        "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*\n\n"\
-                        "I tuoi main champion sono attualmente:\n{2}\n{3}\n{4}\n".format(summoner.name,
+                        "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
+                        "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
                                                                                                summoner.level,
                                                                                                masteries[0],
                                                                                                masteries[1],
@@ -91,7 +90,7 @@ def get_champion_masteries(summoner_name):
     rv = []
 
     summoner = cassiopeia.get_summoner(name=summoner_name)
-    masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level == 7)
+    masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level >= 1)
 
     for champion in masteries_champion:
         rv.append(champion.champion.name)
