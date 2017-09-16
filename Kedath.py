@@ -9,12 +9,11 @@ from settings import API, TOKEN, start_msg, help_msg
 cassiopeia.set_riot_api_key(API)
 cassiopeia.set_default_region("EUW")
 
-# Summoner Name
-summoner = ""
+# State for user
+user_state = {}
+
 
 def handle(msg):
-    global summoner
-
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     chat_id = msg['chat']['id']
@@ -27,39 +26,43 @@ def handle(msg):
     elif command_input == "/help" or command_input == "/help@KedathBot":
         bot.sendMessage(chat_id, help_msg)
 
-    elif command_input.split()[0] == "/set_username" or command_input.split()[0] == "/set_username@KedathBot":
-        try:
-            summoner_name = command_input.split()[1]
+    elif command_input == "/set_username" or command_input.split()[0] == "/set_username@KedathBot":
+        msg = "Inserisci il tuo nome evocatore."
+        bot.sendMessage(chat_id, msg, parse_mode="Markdown")
 
-            try: 
-                summoner = get_summoner(summoner_name)
+        # Set user state
+        user_state[chat_id] = 1
 
-                # Take some time to get all the info from RIOT
-                bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode="Markdown")
+    elif user_state[chat_id] == 1:
+        try: 
+            summoner = get_summoner(command_input)
 
-                masteries = get_champion_masteries(summoner_name)
+            # Take some time to get all the info from RIOT
+            bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode="Markdown")
 
-                try:
-                    msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                                "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
-                                "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
-                                                                                                    summoner.level,
-                                                                                                    masteries[0],
-                                                                                                    masteries[1],
-                                                                                                    masteries[2])
-                except IndexError:
-                    msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                                "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
-                                                                                                summoner.level)
+            masteries = get_champion_masteries(command_input)
 
-            except:
-                msg = "Evocatore non trovato."
+            try:
+                msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                            "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*\n\n"\
+                            "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
+                                                                                                summoner.level,
+                                                                                                masteries[0],
+                                                                                                masteries[1],
+                                                                                                masteries[2])
+            except IndexError:
+                msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
+                            "Benvenuto *{0}*!\nIl tuo livello attuale è il: *{1}*".format(summoner.name,
+                                                                                            summoner.level)
 
-        except IndexError:
-            msg = "Inserisci il tuo nome evocatore\n"\
-                  "/set\_username NOME"
+        except:
+            msg = "Evocatore non trovato."
+
         finally:
             bot.sendMessage(chat_id, msg, parse_mode="Markdown")
+
+            # Return to 0 state
+            user_state[chat_id] = 0
 
 
     
