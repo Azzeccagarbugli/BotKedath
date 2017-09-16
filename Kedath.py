@@ -94,7 +94,7 @@ def handle(msg):
             except IndexError:
                 msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
                       "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name,
-                                                                                    summoner.level)
+                                                                                 summoner.level)
 
         except Exception as e: 
             msg = "Evocatore non trovato."
@@ -160,6 +160,12 @@ def get_champion_masteries(summoner):
 
     for champion in masteries_champion:
         rv.append("{0} ({1})".format(champion.champion.name, champion.points))
+        # TODO: inserire il puinteggio in fomratto ridotto, convertire il numero in stringa e vedere la 
+        # sua lunghezza e a quel punto basarsi su quella per inserire la 'k' o la 'm'
+        # ES: 231k oppure 3m
+        
+        # a = str(champion.points)
+        # print(len(a))
 
     return rv
 
