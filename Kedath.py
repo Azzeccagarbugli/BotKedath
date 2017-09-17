@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import telepot
 import cassiopeia
 from time import sleep
@@ -159,15 +160,22 @@ def get_champion_masteries(summoner):
     masteries_champion = summoner.champion_masteries.filter(lambda cm: cm.level == 7)
 
     for champion in masteries_champion:
-        rv.append("{0} ({1})".format(champion.champion.name, champion.points))
-        # TODO: inserire il puinteggio in fomratto ridotto, convertire il numero in stringa e vedere la 
-        # sua lunghezza e a quel punto basarsi su quella per inserire la 'k' o la 'm'
-        # ES: 231k oppure 3m
-        
-        # a = str(champion.points)
-        # print(len(a))
+        rv.append("{0} ({1})".format(champion.champion.name, millify(champion.points)))
 
     return rv
+
+
+def millify(num):
+    """
+    Convert long numbers to human readable
+    https://stackoverflow.com/questions/3154460/python-human-readable-large-numbers#3155023
+    """
+    millnames = ['', 'k', 'm']
+
+    num = float(num)
+    millidx = max(0,min(len(millnames)-1, int(math.floor(0 if num == 0 else math.log10(abs(num))/3))))
+
+    return '{:.0f}{}'.format(num / 10**(3 * millidx), millnames[millidx])
 
 
 # PID file
