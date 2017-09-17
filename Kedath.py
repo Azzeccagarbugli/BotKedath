@@ -4,8 +4,8 @@ import math
 import telepot
 import cassiopeia
 from time import sleep
-from telepot.namedtuple import ReplyKeyboardMarkup
-from settings import API, TOKEN, start_msg, help_msg
+from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
+from settings import API, TOKEN, start_msg, help_msg, ad_msg
 
 # Server list
 server_dict = { 
@@ -56,7 +56,7 @@ def handle(msg):
                         ["Turkey"],
                         ["Russia"],
                         ["PBE"]
-                    ], one_time_keyboard=True)
+                    ])
 
         msg = "Seleziona la tua regione"
         bot.sendMessage(chat_id, msg, reply_markup=markup)
@@ -69,7 +69,8 @@ def handle(msg):
         user_server[chat_id] = server_dict[command_input]
 
         msg = "Inserisci il tuo nome evocatore"
-        bot.sendMessage(chat_id, msg, parse_mode="Markdown")
+        # Remove markup keyboard
+        bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
 
         # Set user state
         user_state[chat_id] = 2
@@ -100,6 +101,7 @@ def handle(msg):
 
         finally:
             bot.sendMessage(chat_id, msg, parse_mode="Markdown")
+            bot.sendMessage(chat_id, ad_msg)
 
             # Return to 0 state
             user_state[chat_id] = 0
