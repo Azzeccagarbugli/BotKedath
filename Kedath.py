@@ -85,17 +85,14 @@ def handle(msg):
             masteries = get_champion_masteries(summoner)
 
             try:
-                msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                      "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*\n\n"\
-                      "I tuoi main champion sono attualmente:\n_{2}_\n_{3}_\n_{4}_\n".format(summoner.name,
-                                                                                             summoner.level,
-                                                                                             masteries[0],
-                                                                                             masteries[1],
-                                                                                             masteries[2])
+                msg = "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name, summoner.level)
+
+                msg += "\n\nI tuoi main champion sono attualmente:\n_• {0}_".format(masteries[0])
+                msg += "\n_• {0}_".format(masteries[1])
+                msg += "\n_• {0}_".format(masteries[2])
+
             except IndexError:
-                msg = "Il tuo nome evocatore è stato riconosciuto.\n"\
-                      "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name,
-                                                                                 summoner.level)
+                pass
 
         except Exception as e: 
             msg = "Evocatore non trovato."
