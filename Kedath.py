@@ -4,8 +4,8 @@ import math
 import telepot
 import cassiopeia
 from time import sleep
-from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove
-from settings import API, TOKEN, start_msg, help_msg, ad_msg
+from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from settings import API, TOKEN, start_msg, help_msg, add_msg
 
 # Server list
 server_dict = { 
@@ -85,6 +85,12 @@ def handle(msg):
             # Get masteries
             masteries = get_champion_masteries(summoner)
 
+            # TODO
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text='Attiva notifiche',
+                                          callback_data="{0}-{1}-{2}".format(chat_id, summoner.name, user_server[chat_id]))],
+                ])
+
             try:
                 msg = "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name, summoner.level)
 
@@ -97,11 +103,11 @@ def handle(msg):
 
         except Exception as e: 
             msg = "Evocatore non trovato."
+            keyboard = ''
             print(e)
 
         finally:
-            bot.sendMessage(chat_id, msg, parse_mode="Markdown")
-            bot.sendMessage(chat_id, ad_msg)
+            bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=keyboard)
 
             # Return to 0 state
             user_state[chat_id] = 0
@@ -177,6 +183,18 @@ def millify(num):
     return '{:.0f}{}'.format(num / 10**(3 * millidx), millnames[millidx])
 
 
+def on_callback_query(msg):
+    query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
+
+    if not os.path.exists("users"):
+        os.makedirs("users")
+
+    f = open("users/" + data, "w")
+    f.close()
+
+    bot.sendMessage(from_id, add_msg)
+
+
 # PID file
 pid = str(os.getpid())
 pidfile = "/tmp/kedathbot.pid"
@@ -195,7 +213,8 @@ print('Vediamo quello che succede...')
 
 try:
     bot = telepot.Bot(TOKEN)
-    bot.message_loop(handle)
+    bot.message_loop({'chat': handle,
+                      'callback_query': on_callback_query})
 
     # Set Riot API
     cassiopeia.set_riot_api_key(API)
