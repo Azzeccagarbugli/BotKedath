@@ -42,7 +42,7 @@ def handle(msg):
     elif command_input == "/help" or command_input == "/help@KedathBot":
         bot.sendMessage(chat_id, help_msg)
 
-    elif command_input == "/set_summoner" or command_input == "/set_summoner@KedathBot":
+    elif command_input == "/search_summoner" or command_input == "/search_summoner@KedathBot":
         markup = ReplyKeyboardMarkup(keyboard=[
                         ["Brazil"],
                         ["Europe North Est"],
