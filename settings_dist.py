@@ -15,7 +15,7 @@ help_msg = "JUST PAOLOCANNONE STYLE 22"
 # KDA message notification
 add_msg = "Da questo momento in poi riceverai una notifica ogni volta che un game sarà concluso "\
           "che ti avviserà con delle statistiche riguardo il tuo KDA.\nPer disabilitare questa opzione "\
-          "puoi usare il comando /silence_kda in modo tale da non ricevere la notifica a fine game"
+          "puoi usare il comando /stop_notification in modo tale da non ricevere la notifica a fine game"
         
 # Update is launched every 'update_time' seconds
 update_time = 5 * 60

@@ -64,6 +64,27 @@ def handle(msg):
         # Set user state
         user_state[chat_id] = 1
 
+    elif command_input == "/stop_notification" or command_input == "/stop_notification@KedathBot":
+        entries = []
+
+        for notifcation_request in os.listdir("users"):
+            user, summoner_name, server = notifcation_request.split('-')
+
+            if user == str(chat_id):
+                entries.append(["{0}-{1}".format(summoner_name, server)])
+
+        markup = ReplyKeyboardMarkup(keyboard=entries)
+
+        if entries == []:
+            msg = "Nessuna notifica abilitata!"
+        else:
+            msg = "Seleziona le notifiche da disabilitare"
+
+        bot.sendMessage(chat_id, msg, reply_markup=markup)
+
+        # Set user state
+        user_state[chat_id] = 3
+
     elif user_state[chat_id] == 1:
         # Set user server
         user_server[chat_id] = server_dict[command_input]
@@ -85,11 +106,10 @@ def handle(msg):
             # Get masteries
             masteries = get_champion_masteries(summoner)
 
-            # TODO
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text='Attiva notifiche',
-                                          callback_data="{0}-{1}-{2}".format(chat_id, summoner.name, user_server[chat_id]))],
-                ])
+                [InlineKeyboardButton(text='Attiva notifiche',
+                                      callback_data="{0}-{1}-{2}".format(chat_id, summoner.name, user_server[chat_id]))],
+            ])
 
             try:
                 msg = "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name, summoner.level)
@@ -111,6 +131,20 @@ def handle(msg):
 
             # Return to 0 state
             user_state[chat_id] = 0
+
+    elif user_state[chat_id] == 3:
+        try:
+            os.remove("users/" + str(chat_id) + "-" + command_input)
+
+            # Remove markup keyboard
+            msg = "*Le notifiche per {0} sono state disabilitate*".format(command_input)
+        except:
+            msg = "*Errore nella rimozione*"
+
+        bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+
+        # Return to 0 state
+        user_state[chat_id] = 0
 
     
 def get_summoner(summoner_name, server):
@@ -193,6 +227,15 @@ def on_callback_query(msg):
         os.makedirs("users")
 
     f = open("users/" + data, "w")
+    user, summoner_name, server = data.split('-')
+
+    # Get summoner on 'server'
+    summoner = get_summoner(summoner_name, server)
+
+    # Get last match id
+    match_id = summoner.match_history[0].id
+
+    f.write(str(match_id))
     f.close()
 
     bot.sendMessage(from_id, add_msg)
@@ -202,9 +245,8 @@ def update():
     """
     This function will check every X minutes for new matches
     """
-
     for notifcation_request in os.listdir("users"):
-        chat_id, summoner_name, server = notifcation_request.split('-')
+        user, summoner_name, server = notifcation_request.split('-')
 
         # Get summoner on 'server'
         summoner = get_summoner(summoner_name, server)
@@ -218,7 +260,7 @@ def update():
             if str(match_id) != last_match_id:
                 # Send last statistics
                 msg = get_last_kda(summoner)
-                bot.sendMessage(chat_id, msg, parse_mode="Markdown")
+                bot.sendMessage(user, msg, parse_mode="Markdown")
 
                 # Overwrite last match ID
                 f = open("users/" + notifcation_request, "w")
