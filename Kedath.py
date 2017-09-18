@@ -5,7 +5,7 @@ import telepot
 import cassiopeia
 from time import sleep
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
-from settings import API, TOKEN, start_msg, help_msg, add_msg
+from settings import API, TOKEN, start_msg, help_msg, add_msg, update_time
 
 # Server list
 server_dict = { 
@@ -132,9 +132,9 @@ def get_summoner(summoner_name, server):
 # TODO
 def get_last_kda(summoner):
     """
-    Get given user last KDA 
+    Get given summoner last KDA 
     """
-    rv = []
+    rv = ''
 
     # Get last match
     last_match = summoner.match_history()[0]
@@ -144,13 +144,13 @@ def get_last_kda(summoner):
             kills = player.stats.kills
             deaths = player.stats.deaths
             assists = player.stats.assists
-            rv.append("K: {0}\nD: {1}\nA: {2}".format(kills, deaths, assists))
+            rv += "*{0}* last match score:\n*K*: {1}\n*D*: {2}\n*A*: {3}\n".format(summoner.name, kills, deaths, assists)
 
             try: 
-                rv.append("KDA: {0}\n".format((kills + assists) / deaths))
+                rv += "*KDA*: {0}\n".format((kills + assists) / deaths)
                 break
             except ZeroDivisionError:
-                rv.append("KDA: Perfect")
+                rv += "*KDA: Perfect*"
                 break
     
     return rv
@@ -184,6 +184,9 @@ def millify(num):
 
 
 def on_callback_query(msg):
+    """
+    Register notification for a specif summoner to user
+    """
     query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
 
     if not os.path.exists("users"):
@@ -193,6 +196,36 @@ def on_callback_query(msg):
     f.close()
 
     bot.sendMessage(from_id, add_msg)
+
+
+def update():
+    """
+    This function will check every X minutes for new matches
+    """
+
+    for notifcation_request in os.listdir("users"):
+        chat_id, summoner_name, server = notifcation_request.split('-')
+
+        # Get summoner on 'server'
+        summoner = get_summoner(summoner_name, server)
+
+        # Get last match id
+        match_id = summoner.match_history[0].id
+
+        with open("users/" + notifcation_request, "r") as f:
+            last_match_id = f.readline()
+
+            if str(match_id) != last_match_id:
+                # Send last statistics
+                msg = get_last_kda(summoner)
+                bot.sendMessage(chat_id, msg, parse_mode="Markdown")
+
+                # Overwrite last match ID
+                f = open("users/" + notifcation_request, "w")
+                f.write(str(match_id))
+                f.close()
+
+    sleep(update_time)
 
 
 # PID file
@@ -220,7 +253,8 @@ try:
     cassiopeia.set_riot_api_key(API)
 
     while 1:
-        sleep(10)
+        update()
+
 finally:
     # Remove PID file on exit
     os.unlink(pidfile)
