@@ -203,7 +203,7 @@ def get_last_kda(summoner):
                 elif kda >= 8:
                     trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostarto che Faker in realtà è una femminuccia" 
                     
-                rv += "Con un *KDA* effettivo uguale a {0}\n\n{1}".format(((kills + assists) / deaths), trick)
+                rv += "Con un *KDA* effettivo uguale a {0}\n{1}".format(((kills + assists) / deaths), trick)
                 break
             except ZeroDivisionError:
                 rv += "Con un *KDA* perfetto, ottima prestazione complimenti!"
@@ -290,7 +290,7 @@ def update():
 
     sleep(update_time)
 
-
+# Log function
 def log_print(txt):
     """
     Write to 'log.txt' adding current date
