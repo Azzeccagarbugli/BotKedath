@@ -5,7 +5,7 @@ API = "API"
 TOKEN = "TOKEN"
 
 # Start message
-start_msg = "Benvenuto su Kedath! Digita il comando /set_summoner per settare il tuo username e il "\
+start_msg = "Benvenuto su Kedath! Digita il comando /search_summoner per settare il tuo username e il "\
             "tuo server di appartenenza e iniziare a ricevere aggioramenti a game finito, "\
             "oppure digita il comando /help per ricevere più informazioni riguardo il funzionamento del Bot"
             
