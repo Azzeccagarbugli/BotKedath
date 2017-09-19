@@ -163,7 +163,6 @@ def get_summoner(summoner_name, server):
         raise Exception('SummonerNotFound')
         
         
-# TODO
 def get_last_kda(summoner):
     """
     Get given summoner last KDA 
@@ -222,9 +221,6 @@ def on_callback_query(msg):
     Register notification for a specif summoner to user
     """
     query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
-
-    if not os.path.exists("users"):
-        os.makedirs("users")
 
     f = open("users/" + data, "w")
     user, summoner_name, server = data.split('-')
@@ -288,6 +284,10 @@ print('Vediamo quello che succede...')
 
 try:
     bot = telepot.Bot(TOKEN)
+
+    if not os.path.exists("users"):
+        os.makedirs("users")
+
     bot.message_loop({'chat': handle,
                       'callback_query': on_callback_query})
 
