@@ -18,4 +18,4 @@ add_msg = "Da questo momento in poi riceverai una notifica ogni volta che un gam
           "puoi usare il comando /stop_notification in modo tale da non ricevere la notifica a fine game"
         
 # Update is launched every 'update_time' seconds
-update_time = 5 * 60
+update_time = 2 * 60
