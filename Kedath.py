@@ -199,9 +199,9 @@ def get_last_kda(summoner):
                             "mostrando a tutti i tuoi avversari di che pasta sei fatto"
                 elif kda >= 6 and kda <= 7:
                     trick = "*VERY GOOD*: In questo game, secondo il tuo KDA, hai sviluppato delle ottime meccaniche di gioco. Continua in "\
-                            "questo modo e la conquista dei più alti elo della landa sarà tua!"
+                            "questo modo e la conquista delle divisioni più prestigiose della landa sarà tua!"
                 elif kda >= 8:
-                    trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostarto che Faker in realtà è una femminuccia" 
+                    trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostrato che Faker in realtà è una femminuccia" 
                     
                 rv += "Con un *KDA* effettivo uguale a {0}\n{1}".format(((kills + assists) / deaths), trick)
                 break
