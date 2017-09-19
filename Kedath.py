@@ -176,6 +176,9 @@ def get_last_kda(summoner):
     """
     rv = ''
 
+    # Tick and trips message
+    trick = ''
+
     # Get last match
     last_match = summoner.match_history()[0]
 
@@ -184,13 +187,26 @@ def get_last_kda(summoner):
             kills = player.stats.kills
             deaths = player.stats.deaths
             assists = player.stats.assists
-            rv += "*{0}* last match score:\n*K*: {1}\n*D*: {2}\n*A*: {3}\n".format(summoner.name, kills, deaths, assists)
+            rv += "Nell'ultimo game hai registrato uno score pari a:\n*K*: {0} - *D*: {1} - *A*: {2}\n".format(kills, deaths, assists)
 
             try: 
-                rv += "*KDA*: {0}\n".format((kills + assists) / deaths)
+                kda = ((kills + assists) / deaths)
+                if kda < 0 and kda >= 2:
+                    trick = "*NOT GOOD*: In questo game, secondo il tuo KDA, non hai contribuito in maniera evidente. Prova "\
+                            "a migliorati nel prossimo game, la landa ti aspetta!"
+                elif kda >= 3 and kda <= 5:
+                    trick = "*GOOD*: In questo game, secondo il tuo KDA, hai contribuito in maniera sostanziosa allo sviluppo del game "\
+                            "mostrando a tutti i tuoi avversari di che pasta sei fatto"
+                elif kda >= 6 and kda <= 7:
+                    trick = "*VERY GOOD*: In questo game, secondo il tuo KDA, hai sviluppato delle ottime meccaniche di gioco. Continua in "\
+                            "questo modo e la conquista dei più alti elo della landa sarà tua!"
+                elif kda >= 8:
+                    trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostarto che Faker in realtà è una femminuccia" 
+                    
+                rv += "Con un *KDA* effettivo uguale a {0}\n\n{1}".format(((kills + assists) / deaths), trick)
                 break
             except ZeroDivisionError:
-                rv += "*KDA: Perfect*"
+                rv += "Con un *KDA* perfetto, ottima prestazione complimenti!"
                 break
     
     return rv
