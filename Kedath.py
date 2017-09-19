@@ -4,6 +4,7 @@ import math
 import telepot
 import cassiopeia
 from time import sleep
+from datetime import datetime
 from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
 from settings import API, TOKEN, start_msg, help_msg, add_msg, update_time
 
@@ -38,9 +39,11 @@ def handle(msg):
 
     if command_input == "/start" or command_input == "/start@KedathBot":
         bot.sendMessage(chat_id, start_msg)
+        log_print("{0} /start".format(chat_id))
 
     elif command_input == "/help" or command_input == "/help@KedathBot":
         bot.sendMessage(chat_id, help_msg)
+        log_print("{0} /help".format(chat_id))
 
     elif command_input == "/search_summoner" or command_input == "/search_summoner@KedathBot":
         markup = ReplyKeyboardMarkup(keyboard=[
@@ -64,6 +67,8 @@ def handle(msg):
         # Set user state
         user_state[chat_id] = 1
 
+        log_print("{0} /search_summoner".format(chat_id))
+
     elif command_input == "/stop_notification" or command_input == "/stop_notification@KedathBot":
         entries = []
 
@@ -84,6 +89,8 @@ def handle(msg):
 
         # Set user state
         user_state[chat_id] = 3
+
+        log_print("{0} /stop_notification".format(chat_id))
 
     elif user_state[chat_id] == 1:
         # Set user server
@@ -235,6 +242,8 @@ def on_callback_query(msg):
     f.close()
 
     bot.sendMessage(from_id, add_msg)
+        
+    log_print("{0} enabled notifications".format(from_id))
 
 
 def update():
@@ -266,6 +275,21 @@ def update():
     sleep(update_time)
 
 
+def log_print(txt):
+    """
+    Write to 'log.txt' adding current date
+    Debug purpose
+    """
+    try:
+        log = open("log.txt", "a")
+    except IOError:
+        log = open("log.txt", "w")
+
+    log.write("[{0}] {1}\n".format(datetime.now().strftime("%m-%d-%Y %H:%M"), txt))
+
+    log.close()
+
+
 # PID file
 pid = str(os.getpid())
 pidfile = "/tmp/kedathbot.pid"
@@ -285,6 +309,7 @@ print('Vediamo quello che succede...')
 try:
     bot = telepot.Bot(TOKEN)
 
+    # Ensure storage dir exists
     if not os.path.exists("users"):
         os.makedirs("users")
 
