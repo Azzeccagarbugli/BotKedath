@@ -187,7 +187,10 @@ def get_last_kda(summoner):
             kills = player.stats.kills
             deaths = player.stats.deaths
             assists = player.stats.assists
-            rv += "Nell'ultimo game hai registrato uno score pari a:\n*K*: {0} - *D*: {1} - *A*: {2}\n".format(kills, deaths, assists)
+            rv += "Nell'ultimo game *{0}* ha registrato uno score pari a:\n*K*: {1}\n*D*: {2}\n*A*: {3}\n".format(summoner.name,
+                                                                                                                kills,
+                                                                                                                deaths,
+                                                                                                                assists)
 
             try: 
                 kda = ((kills + assists) / deaths)
@@ -196,14 +199,14 @@ def get_last_kda(summoner):
                             "a migliorati nel prossimo game, la landa ti aspetta!"
                 elif kda >= 3 and kda <= 5:
                     trick = "*GOOD*: In questo game, secondo il tuo KDA, hai contribuito in maniera sostanziosa allo sviluppo del game "\
-                            "mostrando a tutti i tuoi avversari di che pasta sei fatto"
+                            "mostrando a tutti i tuoi avversari di che pasta sei fatto!"
                 elif kda >= 6 and kda <= 7:
                     trick = "*VERY GOOD*: In questo game, secondo il tuo KDA, hai sviluppato delle ottime meccaniche di gioco. Continua in "\
                             "questo modo e la conquista delle divisioni più prestigiose della landa sarà tua!"
                 elif kda >= 8:
-                    trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostrato che Faker in realtà è una femminuccia" 
+                    trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostrato che Faker in realtà è una femminuccia!"
                     
-                rv += "Con un *KDA* effettivo uguale a {0}\n{1}".format(((kills + assists) / deaths), trick)
+                rv += "Con un *KDA* effettivo uguale a {0}\n\n{1}".format(((kills + assists) / deaths), trick)
                 break
             except ZeroDivisionError:
                 rv += "Con un *KDA* perfetto, ottima prestazione complimenti!"
