@@ -4,7 +4,9 @@
 
 ## Introduzione ##
 
-Grazie a Kedath ad ogni fine game avrai la possibilità di essere avvertito mediante una notifica riguardo al tuo KDA! Inoltre potrai anche seguire più giocatori contemporaneamente e essere al corrente delle loro prestazioni.
+Grazie a Kedath ad ogni fine game avrai la possibilità di essere avvertito mediante una notifica riguardo al tuo KDA!
+
+Inoltre potrai anche seguire più giocatori contemporaneamente ed essere al corrente delle loro prestazioni.
 
 _Ci vediamo nella Landa degli Evocatori!_
 
