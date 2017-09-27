@@ -33,8 +33,6 @@ user_server = {}
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
-
-    chat_id = msg['chat']['id']
     command_input = msg['text']
 
     if command_input == "/start" or command_input == "/start@KedathBot":
