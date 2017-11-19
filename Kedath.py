@@ -9,7 +9,7 @@ from telepot.namedtuple import ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineK
 from settings import API, TOKEN, start_msg, help_msg, add_msg, update_time
 
 # Server list
-server_dict = { 
+server_dict = {
     "Brazil" : "BR",
     "Europe North Est" : "EUNE",
     "Europe West" : "EUW",
@@ -32,6 +32,9 @@ user_server = {}
 
 
 def handle(msg):
+    """
+    Handle messages recevied from users
+    """
     content_type, chat_type, chat_id = telepot.glance(msg)
     command_input = msg['text']
 
@@ -45,19 +48,19 @@ def handle(msg):
 
     elif command_input == "/search_summoner" or command_input == "/search_summoner@KedathBot":
         markup = ReplyKeyboardMarkup(keyboard=[
-                        ["Brazil"],
-                        ["Europe North Est"],
-                        ["Europe West"],
-                        ["Japan"],
-                        ["Korea"],
-                        ["Latin North America"],
-                        ["Latin South America"],
-                        ["North America"],
-                        ["Oceania"],
-                        ["Turkey"],
-                        ["Russia"],
-                        ["PBE"]
-                    ])
+            ["Brazil"],
+            ["Europe North Est"],
+            ["Europe West"],
+            ["Japan"],
+            ["Korea"],
+            ["Latin North America"],
+            ["Latin South America"],
+            ["North America"],
+            ["Oceania"],
+            ["Turkey"],
+            ["Russia"],
+            ["PBE"]
+        ])
 
         msg = "Seleziona la tua regione"
         bot.sendMessage(chat_id, msg, reply_markup=markup)
@@ -70,8 +73,8 @@ def handle(msg):
     elif command_input == "/stop_notification" or command_input == "/stop_notification@KedathBot":
         entries = []
 
-        for notifcation_request in os.listdir("users"):
-            user, summoner_name, server = notifcation_request.split('-')
+        for notification_request in os.listdir("users"):
+            user, summoner_name, server = notification_request.split('-')
 
             if user == str(chat_id):
                 entries.append(["{0}-{1}".format(summoner_name, server)])
@@ -102,7 +105,7 @@ def handle(msg):
         user_state[chat_id] = 2
 
     elif user_state[chat_id] == 2:
-        try: 
+        try:
             summoner = get_summoner(command_input, user_server[chat_id])
 
             # Take some time to get all the info from RIOT
@@ -118,7 +121,6 @@ def handle(msg):
 
             try:
                 msg = "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name, summoner.level)
-
                 msg += "\n\nI tuoi main champion sono attualmente:\n_• {0}_".format(masteries[0])
                 msg += "\n_• {0}_".format(masteries[1])
                 msg += "\n_• {0}_".format(masteries[2])
@@ -126,7 +128,7 @@ def handle(msg):
             except IndexError:
                 pass
 
-        except Exception as e: 
+        except Exception as e:
             msg = "Evocatore non trovato."
             keyboard = ''
             print(e)
@@ -151,7 +153,6 @@ def handle(msg):
         # Return to 0 state
         user_state[chat_id] = 0
 
-    
 def get_summoner(summoner_name, server):
     """
     Check if a summoner exists and if exists return a 'summoner' instance
@@ -160,24 +161,17 @@ def get_summoner(summoner_name, server):
     cassiopeia.set_default_region(server)
 
     # Get summoner
-    summoner = cassiopeia.get_summoner(name = summoner_name)
+    summoner = cassiopeia.get_summoner(name=summoner_name)
 
-    if summoner.exists == True:
+    if summoner.exists is True:
         return summoner
     else:
         raise Exception('SummonerNotFound')
-        
-        
+
 def get_last_kda(summoner):
     """
-    Get given summoner last KDA 
+    Get given summoner last KDA
     """
-    # Return value
-    rv = ''
-
-    # Tricks and tips message
-    trick = ''
-
     # Get last match
     last_match = summoner.match_history()[0]
 
@@ -187,34 +181,32 @@ def get_last_kda(summoner):
             deaths = player.stats.deaths
             assists = player.stats.assists
 
-            rv += "Nell'ultimo game *{0}* ha registrato uno score pari a:\n*K*: {1}\n*D*: {2}\n*A*: {3}\n".format(summoner.name,
-                                                                                                                kills,
-                                                                                                                deaths,
-                                                                                                                assists)
-
+            msg = ("Nell'ultimo game *{0}* ha registrato uno score pari a:\n"
+                   "*K*: {1}\n*D*: {2}\n*A*: {3}\n".format(summoner.name,
+                                                           kills,
+                                                           deaths,
+                                                           assists))
 
             if deaths == 0:
-                rv += "\n*PERFECT: * In questo game hai ottenuto un *KDA* perfetto, ottima prestazione complimenti!"
+                msg += "\n*PERFECT: * In questo game hai ottenuto un *KDA* perfetto, ottima prestazione complimenti!"
             else:
                 kda = ((kills + assists) / deaths)
+                msg += "Con un *KDA* effettivo uguale a {0}\n\n".format(kda)
 
                 if kda < 2:
-                    trick = "*NOT GOOD*: In questo game, secondo il tuo KDA, non hai contribuito in maniera evidente. Prova "\
+                    msg += "*NOT GOOD*: In questo game, secondo il tuo KDA, non hai contribuito in maniera evidente. Prova "\
                             "a migliorati nel prossimo game, la landa ti aspetta!"
                 elif kda >= 2 and kda < 5:
-                    trick = "*GOOD*: In questo game, secondo il tuo KDA, hai contribuito in maniera sostanziosa allo sviluppo del game "\
+                    msg += "*GOOD*: In questo game, secondo il tuo KDA, hai contribuito in maniera sostanziosa allo sviluppo del game "\
                             "mostrando a tutti i tuoi avversari di che pasta sei fatto!"
                 elif kda >= 5 and kda < 8:
-                    trick = "*VERY GOOD*: In questo game, secondo il tuo KDA, hai sviluppato delle ottime meccaniche di gioco. Continua in "\
+                    msg += "*VERY GOOD*: In questo game, secondo il tuo KDA, hai sviluppato delle ottime meccaniche di gioco. Continua in "\
                             "questo modo e la conquista delle divisioni più prestigiose della landa sarà tua!"
                 elif kda >= 8:
-                    trick = "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostrato che Faker in realtà è una femminuccia!"
-                    
-                rv += "Con un *KDA* effettivo uguale a {0}\n\n{1}".format(kda, trick)
-
+                    msg += "*JUST A GOD*: In questo game, secondo il tuo KDA, hai semplicemente dimostrato che Faker in realtà è una femminuccia!"
             break
-    
-    return rv
+
+    return msg
 
 def get_champion_masteries(summoner):
     """
@@ -263,7 +255,7 @@ def on_callback_query(msg):
     f.close()
 
     bot.sendMessage(from_id, add_msg)
-        
+
     log_print("{0} enabled notifications".format(from_id))
 
 
@@ -271,8 +263,8 @@ def update():
     """
     This function will check every X minutes for new matches
     """
-    for notifcation_request in os.listdir("users"):
-        user, summoner_name, server = notifcation_request.split('-')
+    for notification_request in os.listdir("users"):
+        user, summoner_name, server = notification_request.split('-')
 
         # Get summoner on 'server'
         summoner = get_summoner(summoner_name, server)
@@ -280,19 +272,24 @@ def update():
         # Get last match id
         match_id = summoner.match_history[0].id
 
-        with open("users/" + notifcation_request, "r") as f:
+        with open("users/" + notification_request, "r") as f:
             last_match_id = f.readline()
 
             if str(match_id) != last_match_id:
-                # Send last statistics
-                msg = get_last_kda(summoner)
-                bot.sendMessage(user, msg, parse_mode="Markdown")
-
                 # Overwrite last match ID
-                f = open("users/" + notifcation_request, "w")
+                f = open("users/" + notification_request, "w")
                 f.write(str(match_id))
                 f.close()
 
+                # Send last statistics
+                msg = get_last_kda(summoner)
+
+                try:
+                    bot.sendMessage(user, msg, parse_mode="Markdown")
+                except telepot.exception.BotWasBlockedError:
+                    os.unlink("users/" + notification_request)
+
+    # Return to sleep
     sleep(update_time)
 
 # Log function
