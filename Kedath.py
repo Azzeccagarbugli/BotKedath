@@ -46,6 +46,7 @@ def handle(msg):
         bot.sendMessage(chat_id, help_msg)
         log_print("{0} /help".format(chat_id))
 
+    # Search summoner - 1
     elif command_input == "/search_summoner" or command_input == "/search_summoner@KedathBot":
         markup = ReplyKeyboardMarkup(keyboard=[
             ["Brazil"],
@@ -70,7 +71,58 @@ def handle(msg):
 
         log_print("{0} /search_summoner".format(chat_id))
 
+    # Search summoner - 2
+    elif user_state[chat_id] == 1:
+        # Set user server
+        user_server[chat_id] = server_dict[command_input]
+
+        # Set user state
+        user_state[chat_id] = 2
+
+        # Remove markup keyboard
+        bot.sendMessage(chat_id,
+                        "Inserisci il tuo nome evocatore",
+                        parse_mode="Markdown",
+                        reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+
+    # Search summoner - 3
+    elif user_state[chat_id] == 2:
+        # Return to 0 state
+        user_state[chat_id] = 0
+
+        summoner = get_summoner(command_input, user_server[chat_id])
+
+        if not summoner:
+            msg = "Evocatore non trovato."
+            keyboard = ''
+        else:
+            # Take some time to get all the info from RIOT
+            bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode="Markdown")
+
+            # Get masteries
+            masteries = get_champion_masteries(summoner)
+
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Attiva notifiche',
+                                    callback_data="{0}-{1}-{2}".format(chat_id, summoner.name, user_server[chat_id]))],
+            ])
+
+            try:
+                msg = "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name, summoner.level)
+                msg += "\n\nI tuoi main champion sono attualmente:\n_• {0}_".format(masteries[0])
+                msg += "\n_• {0}_".format(masteries[1])
+                msg += "\n_• {0}_".format(masteries[2])
+
+            except IndexError:
+                pass
+
+        bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=keyboard)
+
+    # Stop notifications - 1
     elif command_input == "/stop_notification" or command_input == "/stop_notification@KedathBot":
+        # Set user state
+        user_state[chat_id] = 3
+
         entries = []
 
         for notification_request in os.listdir("users"):
@@ -88,60 +140,15 @@ def handle(msg):
 
         bot.sendMessage(chat_id, msg, reply_markup=markup)
 
-        # Set user state
-        user_state[chat_id] = 3
-
         log_print("{0} /stop_notification".format(chat_id))
 
-    elif user_state[chat_id] == 1:
-        # Set user server
-        user_server[chat_id] = server_dict[command_input]
-
-        msg = "Inserisci il tuo nome evocatore"
-        # Remove markup keyboard
-        bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
-
-        # Set user state
-        user_state[chat_id] = 2
-
-    elif user_state[chat_id] == 2:
-        try:
-            summoner = get_summoner(command_input, user_server[chat_id])
-
-            # Take some time to get all the info from RIOT
-            bot.sendMessage(chat_id, "Stiamo elaborando i tuoi dati...", parse_mode="Markdown")
-
-            # Get masteries
-            masteries = get_champion_masteries(summoner)
-
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text='Attiva notifiche',
-                                      callback_data="{0}-{1}-{2}".format(chat_id, summoner.name, user_server[chat_id]))],
-            ])
-
-            try:
-                msg = "Benvenuto *{0}*!\nIl tuo livello attuale è: *{1}*".format(summoner.name, summoner.level)
-                msg += "\n\nI tuoi main champion sono attualmente:\n_• {0}_".format(masteries[0])
-                msg += "\n_• {0}_".format(masteries[1])
-                msg += "\n_• {0}_".format(masteries[2])
-
-            except IndexError:
-                pass
-
-        except Exception as e:
-            msg = "Evocatore non trovato."
-            keyboard = ''
-            print(e)
-
-        finally:
-            bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=keyboard)
-
-            # Return to 0 state
-            user_state[chat_id] = 0
-
+    # Stop notifications - 2
     elif user_state[chat_id] == 3:
+        # Return to 0 state
+        user_state[chat_id] = 0
+
         try:
-            os.remove("users/" + str(chat_id) + "-" + command_input)
+            os.unlink("users/" + str(chat_id) + "-" + command_input)
 
             # Remove markup keyboard
             msg = "*Le notifiche per {0} sono state disabilitate*".format(command_input)
@@ -149,9 +156,11 @@ def handle(msg):
             msg = "*Errore nella rimozione*"
 
         bot.sendMessage(chat_id, msg, parse_mode="Markdown", reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
-
-        # Return to 0 state
-        user_state[chat_id] = 0
+    
+    # Get last KDA 
+    elif command_input == "/get_last_kda" or command_input == "/get_last_kda@KedathBot":
+        # TODO
+        bot.sendMessage(chat_id, "Funzione ancora non disponibile!")
 
 def get_summoner(summoner_name, server):
     """
