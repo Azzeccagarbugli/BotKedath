@@ -166,7 +166,7 @@ def get_summoner(summoner_name, server):
     if summoner.exists is True:
         return summoner
     else:
-        raise Exception('SummonerNotFound')
+        return 0
 
 def get_last_kda(summoner):
     """
@@ -248,6 +248,13 @@ def on_callback_query(msg):
     # Get summoner on 'server'
     summoner = get_summoner(summoner_name, server)
 
+    if not summoner:
+        bot.sendMessage(from_id, "Evocatore non trovato!")
+        bot.answerCallbackQuery(query_id)
+    else:
+        # Get last match id
+        match_id = summoner.match_history[0].id
+
     # Get last match id
     match_id = summoner.match_history[0].id
 
@@ -255,6 +262,7 @@ def on_callback_query(msg):
     f.close()
 
     bot.sendMessage(from_id, add_msg)
+    bot.answerCallbackQuery(query_id)
 
     log_print("{0} enabled notifications".format(from_id))
 
@@ -269,25 +277,29 @@ def update():
         # Get summoner on 'server'
         summoner = get_summoner(summoner_name, server)
 
-        # Get last match id
-        match_id = summoner.match_history[0].id
+        # Summoner not found
+        if not summoner:
+            os.unlink("users/" + notification_request)
+        else:
+            # Get last match id
+            match_id = summoner.match_history[0].id
 
-        with open("users/" + notification_request, "r") as f:
-            last_match_id = f.readline()
+            with open("users/" + notification_request, "r") as f:
+                last_match_id = f.readline()
 
-            if str(match_id) != last_match_id:
-                # Overwrite last match ID
-                f = open("users/" + notification_request, "w")
-                f.write(str(match_id))
-                f.close()
+                if str(match_id) != last_match_id:
+                    # Overwrite last match ID
+                    f = open("users/" + notification_request, "w")
+                    f.write(str(match_id))
+                    f.close()
 
-                # Send last statistics
-                msg = get_last_kda(summoner)
+                    # Send last statistics
+                    msg = get_last_kda(summoner)
 
-                try:
-                    bot.sendMessage(user, msg, parse_mode="Markdown")
-                except telepot.exception.BotWasBlockedError:
-                    os.unlink("users/" + notification_request)
+                    try:
+                        bot.sendMessage(user, msg, parse_mode="Markdown")
+                    except telepot.exception.BotWasBlockedError:
+                        os.unlink("users/" + notification_request)
 
     # Return to sleep
     sleep(update_time)
