@@ -38,13 +38,19 @@ def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
     command_input = msg['text']
 
+    # Check user state
+    try:
+        user_state[chat_id] = user_state[chat_id]
+    except:
+        user_state[chat_id] = 0
+
     if command_input == "/start" or command_input == "/start@KedathBot":
-        bot.sendMessage(chat_id, start_msg)
         log_print("{0} /start".format(chat_id))
+        bot.sendMessage(chat_id, start_msg)
 
     elif command_input == "/help" or command_input == "/help@KedathBot":
-        bot.sendMessage(chat_id, help_msg)
         log_print("{0} /help".format(chat_id))
+        bot.sendMessage(chat_id, help_msg)
 
     # Search summoner - 1
     elif command_input == "/search_summoner" or command_input == "/search_summoner@KedathBot":
